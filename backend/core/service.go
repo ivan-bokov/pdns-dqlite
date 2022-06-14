@@ -775,3 +775,22 @@ func (s *Service) GetUpdatedMasters() ([]*DomainInfo, error) {
 	}
 	return updatedDomains, nil
 }
+func (s *Service) GetTest(key string) (string, error) {
+	rows, err := s.db.Query("SELECT value FROM model WHERE key = ?", key)
+	if err != nil {
+		return "", err
+	}
+	for rows.Next() {
+		value := ""
+		err = rows.Scan(&value)
+		return value, nil
+	}
+	return "", nil
+}
+func (s *Service) PostTest(key, value string) error {
+	_, err := s.db.Exec("INSERT OR REPLACE INTO model(key, value) VALUES(?, ?)", key, value)
+	if err != nil {
+		return err
+	}
+	return nil
+}

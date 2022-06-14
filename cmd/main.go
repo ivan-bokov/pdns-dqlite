@@ -2,14 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/canonical/go-dqlite/app"
-	"github.com/canonical/go-dqlite/client"
 	"github.com/ivan-bokov/pdns-dqlite/backend"
 	"github.com/ivan-bokov/pdns-dqlite/backend/core"
 	"github.com/pkg/errors"
@@ -30,15 +28,15 @@ func main() {
 			if err := os.Mkdir(dir, 0o755); err != nil && !errors.Is(err, os.ErrExist) {
 				return errors.Wrapf(err, "не могу создать %s", dir)
 			}
-			logFunc := func(l client.LogLevel, msg string, a ...interface{}) {
-				log.Printf(fmt.Sprintf("%s: \n", msg), a...)
-			}
+			//logFunc := func(l client.LogLevel, msg string, a ...interface{}) {
+			//	log.Printf(fmt.Sprintf("%s: \n", msg), a...)
+			//}
 			opts := make([]app.Option, 0)
 			opts = append(opts, app.WithAddress(host))
 			if cluster != nil {
 				opts = append(opts, app.WithCluster(*cluster))
 			}
-			opts = append(opts, app.WithLogFunc(logFunc))
+			//opts = append(opts, app.WithLogFunc(logFunc))
 			dqlite, err := app.New(dir, opts...)
 			if err != nil {
 				return errors.Wrap(err, "Ошибка создания экземпляра dqlite")
@@ -93,6 +91,7 @@ func schema() string {
 	return `
 PRAGMA foreign_keys=OFF;
 BEGIN TRANSACTION;
+CREATE TABLE IF NOT EXISTS model (key TEXT, value TEXT, UNIQUE(key));
 CREATE TABLE IF NOT EXISTS domains (
   id                    INTEGER PRIMARY KEY,
   name                  VARCHAR(255) NOT NULL COLLATE NOCASE,

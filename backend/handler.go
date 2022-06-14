@@ -19,7 +19,9 @@ func (h *Handler) noImplementation(g *gin.Context) {
 	g.JSON(200, gin.H{"result": false})
 }
 func (h *Handler) InitRoutes() *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
+
 	r.GET("lookup/:qname/:qtype", h.lookup)    // ++++
 	r.GET("list/:domain_id/:zonename", h.list) // ++++
 	r.GET("getbeforeandafternamesabsolute/:domain_id/:qname", h.getbeforeandafternamesabsolute)
@@ -54,7 +56,27 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	r.GET("getUnfreshSlaveInfos", h.noImplementation)
 	r.PATCH("setFresh/:id", h.setFresh) // ++++
 
+	r.GET("test/:key", h.getTest)
+	r.POST("test/:key", h.postTest)
+
 	return r
+}
+func (h *Handler) getTest(g *gin.Context) {
+	key := g.Param("key")
+	val, err := h.svc.GetTest(key)
+	if err != nil {
+		g.JSON(204, gin.H{"err": err.Error()})
+	}
+	g.JSON(200, val)
+}
+func (h *Handler) postTest(g *gin.Context) {
+	key := g.Param("key")
+	value, _ := g.GetQuery("value")
+	err := h.svc.PostTest(key, value)
+	if err != nil {
+		g.JSON(204, gin.H{"err": err.Error()})
+	}
+	g.JSON(200, "OK")
 }
 func (h *Handler) getUpdatedMasters(g *gin.Context) {
 	di, err := h.svc.GetUpdatedMasters()
