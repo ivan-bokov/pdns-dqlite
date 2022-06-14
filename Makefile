@@ -1,3 +1,4 @@
 build:
-	export CGO_LDFLAGS_ALLOW="-Wl,-z,now"
-	go build -tags libsqlite3 cmd/main.go -o pdns-dqlite
+	export CGO_LDFLAGS_ALLOW="-Wl,-z,now" && \
+	go mod tidy && \
+	go build -tags libsqlite3 -o pdns-dqlite cmd/main.go
